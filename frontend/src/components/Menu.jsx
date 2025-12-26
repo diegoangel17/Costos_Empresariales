@@ -8,7 +8,7 @@ export default function Menu() {
 return (
     <div className="min-h-screen bg-gray-50 p-4 sm:p-6">
       <div className="max-w-6xl mx-auto">
-        <div className='flex justify-between'>
+        <div className='flex justify-between items-center pt-5'>
           <div className="mb-6 sm:mb-8">
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
               Crear Nuevo Reporte

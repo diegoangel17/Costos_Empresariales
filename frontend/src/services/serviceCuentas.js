@@ -79,7 +79,20 @@ export const clasificacionesService = {
     
     return await response.json();
   },
-  
+
+  async delete(id) {
+    const response = await fetch(`${API_URL}/api/clasificaciones/${id}`, {
+      method: 'DELETE',
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Error al eliminar la clasificación');
+    }
+    
+    return true;
+  },
+
   async update(id, clasificacionActualizada) {
     const response = await fetch(`${API_URL}/api/clasificaciones/${id}`, {
       method: 'PUT',

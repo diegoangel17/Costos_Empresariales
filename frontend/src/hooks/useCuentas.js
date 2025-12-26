@@ -57,6 +57,19 @@ export function useCuentas() {
     }
   };
 
+  const eliminarClasificacion = async (id) => {
+    try {
+      await clasificacionesService.delete(id);
+      
+      // Actualizamos la lista localmente quitando el elemento borrado
+      setClasificaciones(prev => prev.filter(c => c.id !== id));
+      return true;
+    } catch (err) {
+      alert(err.message); // Mostramos el mensaje del backend ("No se puede eliminar...")
+      return false;
+    }
+  };
+
   const cargarCuentas = async () => {
     try {
       setCargando(true);
@@ -93,9 +106,6 @@ export function useCuentas() {
   };
 
   const eliminarCuenta = async (id) => {
-    // Confirmación nativa simple antes de llamar a la API
-    if (!window.confirm("¿Estás seguro de que deseas eliminar esta cuenta?")) return;
-
     try {
       await cuentasService.delete(id);
       
@@ -121,5 +131,5 @@ export function useCuentas() {
     }
   };
 
-  return { cuentas, clasificaciones, cargando, error, recargar: cargarCuentas, editarCuenta, eliminarCuenta, agregarCuenta, agregarClasificacion, editarClasificacion };
+  return { cuentas, clasificaciones, cargando, error, recargar: cargarCuentas, editarCuenta, eliminarCuenta, agregarCuenta, agregarClasificacion, editarClasificacion, eliminarClasificacion };
 }

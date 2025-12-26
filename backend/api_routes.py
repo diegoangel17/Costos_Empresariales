@@ -37,6 +37,24 @@ def actualizar_clasificacion(id):
     db.session.commit()
     return jsonify(clasificacion.to_json()), 200
 
+@api_bp.route('/clasificaciones/<int:id>', methods=['DELETE'])
+def eliminar_clasificacion(id):
+    clasificacion = ClasificacionCuenta.query.get_or_404(id)
+    
+    # 1. VALIDACIÓN DE SEGURIDAD (Integridad Referencial)
+    # Buscamos si existen cuentas vinculadas a esta clasificación
+    cuentas = Cuenta.query.filter_by(id_clasificacion=id).count()
+    
+    if cuentas > 0:
+        return jsonify({
+            'error': 'No se puede eliminar: Esta clasificación tiene cuentas asociadas.'
+        }), 409 # 409 Conflict
+        
+    # 2. Si está limpia, procedemos a borrar
+    db.session.delete(clasificacion)
+    db.session.commit()
+    return jsonify({'mensaje': 'Clasificación eliminada correctamente'}), 200
+
 
 @api_bp.route('/cuentas', methods=['GET'])
 def obtener_cuentas():
