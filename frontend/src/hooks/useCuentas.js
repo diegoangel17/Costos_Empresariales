@@ -34,6 +34,29 @@ export function useCuentas() {
     }
   };
 
+  const editarClasificacion = async (id, nombre) => {
+    try {
+      // 1. Llamamos al backend
+      await clasificacionesService.update(id, { nombre });
+      
+      // 2. Actualizamos la lista localmente (Optimistic Update)
+      // Esto evita tener que recargar toda la lista desde el servidor
+      setClasificaciones(prevClasificaciones => 
+        prevClasificaciones.map(clasificacion => 
+          clasificacion.id === id 
+            ? { ...clasificacion, nombre }
+            : clasificacion
+        )
+      );
+      cargarClasificaciones(); 
+      
+      return true;
+    } catch (err) {
+      setError(err.message);
+      return false;
+    }
+  };
+
   const cargarCuentas = async () => {
     try {
       setCargando(true);
@@ -98,5 +121,5 @@ export function useCuentas() {
     }
   };
 
-  return { cuentas, clasificaciones, cargando, error, recargar: cargarCuentas, editarCuenta, eliminarCuenta, agregarCuenta, agregarClasificacion };
+  return { cuentas, clasificaciones, cargando, error, recargar: cargarCuentas, editarCuenta, eliminarCuenta, agregarCuenta, agregarClasificacion, editarClasificacion };
 }

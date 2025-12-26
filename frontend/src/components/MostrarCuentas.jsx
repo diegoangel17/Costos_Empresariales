@@ -14,7 +14,7 @@ const TEMAS_DISPONIBLES = [
 
 // --- COMPONENTE PRINCIPAL ---
 export function ListaCuentas() {
-    const { cuentas, clasificaciones, cargando, error, editarCuenta, eliminarCuenta, agregarCuenta, agregarClasificacion } = useCuentas();
+    const { cuentas, clasificaciones, cargando, error, editarCuenta, eliminarCuenta, agregarCuenta, agregarClasificacion, editarClasificacion } = useCuentas();
     if (cargando) return <p>Cargando...</p>;
     if (error) return <p className="text-red-500">Error: {error}</p>;
     return (
@@ -36,9 +36,11 @@ export function ListaCuentas() {
                     />
                     <ul>
                         {clasificaciones.map((clasificacion)=>(
-                            <li className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-3 mb-6 flex flex-row gap-1 justify-center items-center">
-                                <p>{clasificacion.nombre}</p>
-                            </li>
+                            <FilaCuenta
+                            key={clasificacion.id}
+                            cueCla={clasificacion}
+                            onChangeClasificacion={editarClasificacion}
+                            />
                         ))}
                     </ul>
                 </div>
@@ -64,11 +66,11 @@ export function ListaCuentas() {
                                 {(cuentas.filter(c => c.clasificacion === clasificacion.nombre)).map((cuenta) => (
                                     <FilaCuenta 
                                         key={cuenta.id} 
-                                        cuenta={cuenta} 
+                                        cueCla={cuenta} 
                                         clasificaciones={clasificaciones}
-                                        onGuardar={editarCuenta}
-                                        onEliminar={eliminarCuenta}
-                                        // Opcional: Pasar el color de texto para que los iconos combinen
+                                        clasificacionId={clasificacion.id}
+                                        onEditarCuenta={editarCuenta}
+                                        onEliminarCuenta={eliminarCuenta}
                                         colorTema={estilo.text} 
                                     />
                                 ))}
@@ -126,7 +128,7 @@ function FormularioC({agregarClasificacion = async () => true,agregarCuenta = as
     );
 }
 
-
+/*
 function FilaCuenta({ cuenta, clasificaciones,clasificacionId, onGuardar, onEliminar }) {
     const [editando, setEditando] = useState(false);
     const [clasifIdTemp, setClasifIdTemp] = useState(clasificacionId);
@@ -208,6 +210,114 @@ function FilaCuenta({ cuenta, clasificaciones,clasificacionId, onGuardar, onElim
                         onClick={() => setEditando(true)} 
                         className="text-gray-400 hover:text-blue-600 p-2"
                         title="Editar cuenta"
+                    >
+                        <Edit2 size={16} />
+                    </button>
+                </>
+            )}
+        </li>
+    );
+}
+*/
+function FilaCuenta({ cueCla, clasificaciones,clasificacionId="", onEditarCuenta, onEliminarCuenta,onChangeClasificacion}) {
+    const [editando, setEditando] = useState(false);
+    const [clasifIdTemp, setClasifIdTemp] = useState(clasificacionId);
+    const [nombreTemp, setNombreTemp] = useState(cueCla.nombre);
+
+    const handleGuardar = async () => {
+        if (nombreTemp.trim()==="") {
+            alert("Agregue un nombre por favor");
+            return;
+        }
+
+        if(clasifIdTemp===""){
+            console.log("clasificacion")
+            await onChangeClasificacion(cueCla.id, nombreTemp);
+            setEditando(false);
+        }
+        else{
+            const datos = {
+            nombre: nombreTemp,
+            id_clasificacion: parseInt(clasifIdTemp)
+            };
+            await onEditarCuenta(cueCla.id, datos);
+            setEditando(false);
+        }
+    };
+
+    const handleCancelar = () => {
+        setNombreTemp(cueCla.nombre);
+        setClasifIdTemp(clasificacionId)
+        setEditando(false);
+    };
+
+    const handleEliminar= async(id) =>{
+    if(clasifIdTemp===""){
+        console.log("cla")
+    }
+    else{
+        console.log("cuenta")
+        onEliminarCuenta(id)
+    }
+    };
+
+    return (
+        <li className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-3 mb-6 flex flex-row gap-1 justify-center items-center">
+            {editando ? (
+                <>
+                    {clasificacionId!==""&&(<select 
+                        className="border p-1 rounded text-sm w-1/3"
+                        value={clasifIdTemp}
+                        onChange={(e) => setClasifIdTemp(e.target.value)}
+                    >
+                        <option value="" disabled>Seleccionar...</option>
+                        
+                        {clasificaciones.map(c => (
+                            <option key={c.id} value={c.id}>{c.nombre}</option>
+                        ))}
+                    </select>)
+                    }
+
+                    <input 
+                        className="border p-1 rounded w-full"
+                        value={nombreTemp}
+                        onChange={(e) => setNombreTemp(e.target.value)}
+                    />
+
+                    <div className="flex gap-2">
+                        <button onClick={handleGuardar} 
+                        className="text-green-600 hover:bg-green-50 p-1 rounded"
+                        title='Guardar cambios'>
+                            <Save size={18} />
+                        </button>
+                        <button onClick={handleCancelar} 
+                        className="text-red-500 hover:bg-red-50 p-1 rounded"
+                        title='Cancelar'>
+                            <X size={18} />
+                        </button>
+                        <button 
+                            onClick={() => handleEliminar(cueCla.id)} 
+                            className="text-gray-400 hover:text-red-600 p-2"
+                            title="Eliminar"
+                        >
+                        
+                            <Trash2 size={16} />
+                        </button>
+                    </div>
+                </>
+            ) : (
+                <>
+                    <div className="flex flex-col md:flex-row md:gap-4 md:items-center w-full">
+                        
+                        <span className="font-semibold text-gray-800">
+                            {cueCla.nombre}
+                        </span>
+                    </div>
+
+                    <button 
+                        onClick={() => setEditando(true)} 
+                        className="text-gray-400 hover:text-blue-600 p-2"
+                        title="Editar"
                     >
                         <Edit2 size={16} />
                     </button>

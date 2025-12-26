@@ -78,5 +78,16 @@ export const clasificacionesService = {
     }
     
     return await response.json();
-  }
+  },
+  
+  async update(id, clasificacionActualizada) {
+    const response = await fetch(`${API_URL}/api/clasificaciones/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(clasificacionActualizada),
+    });
+
+    if (!response.ok) throw new Error('Error al actualizar la clasificación');
+    return await response.json();
+  },
 };

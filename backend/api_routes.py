@@ -26,6 +26,17 @@ def crear_clasificacion():
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
+    
+@api_bp.route('/clasificaciones/<int:id>', methods=['PUT'])
+def actualizar_clasificacion(id):
+    clasificacion = ClasificacionCuenta.query.get_or_404(id) # Busca o da error 404
+    data = request.json
+    # Actualizamos solo si envían el dato
+    if 'nombre' in data:
+        clasificacion.nombre = data['nombre']
+    db.session.commit()
+    return jsonify(clasificacion.to_json()), 200
+
 
 @api_bp.route('/cuentas', methods=['GET'])
 def obtener_cuentas():
