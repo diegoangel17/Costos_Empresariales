@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useCuentas } from '../context/CuentasContext'; // Archivo nuevo
 import { Bolt, FileText} from 'lucide-react';
 import { SUBPROGRAMAS } from '../hooks/menu';
 import { Link } from 'react-router-dom';
 
 export default function Menu() {
-  
+  const { reportData, setReportData } = useCuentas();
 return (
     <div className="min-h-screen bg-gray-50 p-4 sm:p-6">
       <div className="max-w-6xl mx-auto">
@@ -46,8 +46,8 @@ return (
               </label>
               <input
                 type="text"
-                //value={reportData.name}
-                //onChange={(e) => setReportData({...reportData, name: e.target.value})}
+                value={reportData.name}
+                onChange={(e) => setReportData({...reportData, name: e.target.value})}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Ej: Reporte Mensual Enero 2025"
               />
@@ -58,8 +58,8 @@ return (
               </label>
               <input
                 type="date"
-                //value={reportData.date}
-                //onChange={(e) => setReportData({...reportData, date: e.target.value})}
+                value={reportData.date}
+                onChange={(e) => setReportData({...reportData, date: e.target.value})}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -70,7 +70,7 @@ return (
           {SUBPROGRAMAS.map((programa) => {
             const Icon = programa.icon;
             return (
-              <Link to={`/${programa.name}`} key={programa.id} className="group bg-white rounded-lg p-5 shadow-sm border-2 border-gray-200 hover:border-emerald-500 hover:shadow-lg transition-all text-left">
+              <Link to={`/${programa.route}`} key={programa.id} className="group bg-white rounded-lg p-5 shadow-sm border-2 border-gray-200 hover:border-emerald-500 hover:shadow-lg transition-all text-left">
                   <div className={`${programa.color} w-12 h-12 rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform`}>
                   <Icon className="w-6 h-6 text-white" />
                 </div>

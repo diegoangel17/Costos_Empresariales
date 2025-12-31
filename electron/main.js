@@ -1,6 +1,7 @@
 const { app, BrowserWindow } = require('electron');
 const path = require('path');
 const { spawn } = require('child_process');
+const net = require('net'); 
 
 let mainWindow;
 let pythonProcess;
@@ -26,19 +27,35 @@ function createWindow() {
 }
 
 function startPython() {
-  // Ajustamos la ruta según el sistema operativo
-  // En Linux/Mac buscamos en backend/venv/bin/python
-  const pythonExecutable = path.join(__dirname, '../backend/venv/bin/python');
-  const scriptPath = path.join(__dirname, '../backend/app.py');
+  const port = 5001; // Tu puerto de Flask
+  const client = new net.Socket();
 
-  pythonProcess = spawn(pythonExecutable, [scriptPath]);
-
-  pythonProcess.stdout.on('data', (data) => {
-    console.log(`[Python]: ${data}`);
+  // Intentamos conectar al puerto 5001
+  client.connect(port, '127.0.0.1', () => {
+    // ÉXITO: Alguien ya está escuchando en el 5001
+    console.log(`[Electron]: El puerto ${port} ya está en uso. Asumiendo que el backend ya está corriendo.`);
+    client.destroy(); // Cerramos este test de conexión
+    // NO lanzamos pythonProcess, usamos el existente.
   });
 
-  pythonProcess.stderr.on('data', (data) => {
-    console.error(`[Python Error]: ${data}`);
+  client.on('error', (err) => {
+    // ERROR: Nadie escucha en el 5001 (o error de conexión) -> LANZAMOS PYTHON
+    console.log(`[Electron]: Puerto ${port} libre. Iniciando servidor Python...`);
+    
+    // --- AQUÍ VA TU LÓGICA ORIGINAL DE SPAWN ---
+    const pythonExecutable = path.join(__dirname, '../backend/venv/bin/python');
+    const scriptPath = path.join(__dirname, '../backend/app.py');
+
+    pythonProcess = spawn(pythonExecutable, [scriptPath]);
+
+    pythonProcess.stdout.on('data', (data) => {
+      console.log(`[Python]: ${data}`);
+    });
+
+    pythonProcess.stderr.on('data', (data) => {
+      console.error(`[Python Error]: ${data}`);
+    });
+    // -------------------------------------------
   });
 }
 
@@ -58,4 +75,28 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();
   }
+});
+
+// --- AGREGAR ESTO PARA EVITAR PROCESOS ZOMBIE ---
+
+function killPythonSubprocess() {
+  if (pythonProcess) {
+    console.log('Matando proceso de Python...');
+    pythonProcess.kill(); // Envía SIGTERM
+    pythonProcess = null;
+  }
+}
+
+// Manejar Ctrl+C en la terminal (Windows/Linux)
+process.on('SIGINT', () => {
+  killPythonSubprocess();
+  app.quit();
+  process.exit(0);
+});
+
+// Manejar kill genérico
+process.on('SIGTERM', () => {
+  killPythonSubprocess();
+  app.quit();
+  process.exit(0);
 });

@@ -1,4 +1,4 @@
-import { useCuentas } from '../hooks/useCuentas';
+import { useCuentas } from '../context/CuentasContext';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Edit2, Save, X, Trash2, House } from 'lucide-react';
 import { useState, useEffect } from 'react';
@@ -20,76 +20,78 @@ export function ListaCuentas() {
 
     return (
         <div className="min-h-screen bg-gray-50 p-4 sm:p-6">
-            <div  className='flex flex-row pb-5'>
-                <Link to="/menu" className="flex items-center gap-2 text-gray-600 mb-4">
-                    <House className="w-10 h-10 text-gray-950" />
-                </Link>
-                <div className='w-full flex justify-center items-center'>
-                    <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mx-6 my-6">Catalogo de Cuentas y Clasificaciones</h2>
-                </div>
-            </div>
-            
-            <div className="mx-4 flex flex-row space-x-10 overflow-x-auto pb-4">
-                
-                {/* COLUMNA 1: GESTIÓN DE CLASIFICACIONES */}
-                <div className='bg-amber-100 p-4 rounded-xl border border-amber-200 mx-auto w-full h-fit min-w-75'>
-                    <h2 className="text-xl font-bold text-amber-900 mb-4 text-center">Editar Categorías</h2>
-                    
-                    {/* Usamos el formulario específico */}
-                    <FormularioClasificacion onAgregar={agregarClasificacion} />
-                    
-                    <ul>
-                        {clasificaciones.map((clasificacion) => (
-                            // Usamos la fila específica
-                            <FilaClasificacion
-                                key={clasificacion.id}
-                                clasificacion={clasificacion} // Pasamos el objeto con nombre claro
-                                onEditar={editarClasificacion}
-                                onEliminar={eliminarClasificacion}
-                            />
-                        ))}
-                    </ul>
+            <div className="max-w-10/12 mx-auto">
+                <div  className='flex flex-row pb-5'>
+                    <Link to="/menu" className="flex items-center gap-2 text-gray-600 mb-4">
+                        <House className="w-10 h-10 text-gray-950" />
+                    </Link>
+                    <div className='w-full flex justify-center items-center'>
+                        <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mx-6 my-6">Catalogo de Cuentas y Clasificaciones</h2>
+                    </div>
                 </div>
                 
-                {/* COLUMNAS DINÁMICAS: CUENTAS POR CLASIFICACIÓN */}
-                {clasificaciones.map((clasificacion, index) => {
-                    const temaIndex = index % TEMAS_DISPONIBLES.length;
-                    const estilo = TEMAS_DISPONIBLES[temaIndex];
+                <div className="mx-4 flex flex-row space-x-10 overflow-x-auto pb-4">
                     
-                    // Filtramos las cuentas de esta columna
-                    const cuentasDeEstaColumna = cuentas.filter(c => c.clasificacion === clasificacion.nombre);
+                    {/* COLUMNA 1: GESTIÓN DE CLASIFICACIONES */}
+                    <div className='bg-amber-100 p-4 rounded-xl border border-amber-200 mx-auto w-full h-fit min-w-75'>
+                        <h2 className="text-xl font-bold text-amber-900 mb-4 text-center">Editar Categorías</h2>
+                        
+                        {/* Usamos el formulario específico */}
+                        <FormularioClasificacion onAgregar={agregarClasificacion} />
+                        
+                        <ul>
+                            {clasificaciones.map((clasificacion) => (
+                                // Usamos la fila específica
+                                <FilaClasificacion
+                                    key={clasificacion.id}
+                                    clasificacion={clasificacion} // Pasamos el objeto con nombre claro
+                                    onEditar={editarClasificacion}
+                                    onEliminar={eliminarClasificacion}
+                                />
+                            ))}
+                        </ul>
+                    </div>
+                    
+                    {/* COLUMNAS DINÁMICAS: CUENTAS POR CLASIFICACIÓN */}
+                    {clasificaciones.map((clasificacion, index) => {
+                        const temaIndex = index % TEMAS_DISPONIBLES.length;
+                        const estilo = TEMAS_DISPONIBLES[temaIndex];
+                        
+                        // Filtramos las cuentas de esta columna
+                        const cuentasDeEstaColumna = cuentas.filter(c => c.clasificacion === clasificacion.nombre);
 
-                    return (
-                        <div 
-                            key={clasificacion.id}
-                            className={`${estilo.bg} ${estilo.border} p-4 rounded-xl border mx-5 w-full h-fit min-w-80 transition-colors duration-300`}
-                        >
-                            <h3 className={`text-2xl font-bold ${estilo.text} mb-3 text-center`}>
-                                {clasificacion.nombre}
-                            </h3>
-                            
-                            {/* Usamos el formulario específico de Cuentas */}
-                            <FormularioCuenta
-                                idClasificacion={clasificacion.id}
-                                onAgregar={agregarCuenta}
-                            />
-                            
-                            <ul className="space-y-2 flex flex-col gap-1 justify-center mt-4">
-                                {cuentasDeEstaColumna.map((cuenta) => (
-                                    // Usamos la fila específica de Cuentas
-                                    <FilaCuenta 
-                                        key={cuenta.id} 
-                                        cuenta={cuenta} // Nombre claro
-                                        clasificacion={clasificacion}
-                                        clasificaciones={clasificaciones} // Necesario para el dropdown
-                                        onEditar={editarCuenta}
-                                        onEliminar={eliminarCuenta}
-                                    />
-                                ))}
-                            </ul>
-                        </div>
-                    );
-                })}
+                        return (
+                            <div 
+                                key={clasificacion.id}
+                                className={`${estilo.bg} ${estilo.border} p-4 rounded-xl border mx-5 w-full h-fit min-w-80 transition-colors duration-300`}
+                            >
+                                <h3 className={`text-2xl font-bold ${estilo.text} mb-3 text-center`}>
+                                    {clasificacion.nombre}
+                                </h3>
+                                
+                                {/* Usamos el formulario específico de Cuentas */}
+                                <FormularioCuenta
+                                    idClasificacion={clasificacion.id}
+                                    onAgregar={agregarCuenta}
+                                />
+                                
+                                <ul className="space-y-2 flex flex-col gap-1 justify-center mt-4">
+                                    {cuentasDeEstaColumna.map((cuenta) => (
+                                        // Usamos la fila específica de Cuentas
+                                        <FilaCuenta 
+                                            key={cuenta.id} 
+                                            cuenta={cuenta} // Nombre claro
+                                            clasificacion={clasificacion}
+                                            clasificaciones={clasificaciones} // Necesario para el dropdown
+                                            onEditar={editarCuenta}
+                                            onEliminar={eliminarCuenta}
+                                        />
+                                    ))}
+                                </ul>
+                            </div>
+                        );
+                    })}
+                </div>
             </div>
         </div>
     );
